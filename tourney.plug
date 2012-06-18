@@ -1,0 +1,6 @@
+[Core]
+Name = Tourney
+Module = tourney
+
+[Documentation]
+Description = Maintain an elo rating system.
