@@ -13,7 +13,8 @@ class Tourney(BotPlugin):
 
     @botcmd
     def fixorgames(self, a,b):
-        if games[0]==1: # oops
+        games = self.get_games()
+        if games[0]!=1: # oops
             raise Exception('no need to fixor')
 
         games = self.get_games()
