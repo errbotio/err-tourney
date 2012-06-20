@@ -1,5 +1,5 @@
 from datetime import datetime
-from itertools import groupby
+import logging
 from math import ceil, sqrt
 from errbot.botplugin import BotPlugin
 from errbot.jabberbot import botcmd
@@ -11,9 +11,25 @@ class Tourney(BotPlugin):
     def get_games(self):
         return self.get('games_record', [])
 
+    @botcmd
+    def fixorgames(self, a,b):
+        if games[0]==1: # oops
+            raise Exception('no need to fixor')
+
+        games = self.get_games()
+        new_games = []
+        for i in range(0, len(games), 3):
+            new_games.append((games[i], games[i+1], games[i+2]))
+        logging.info('%s'% new_games )
+        self['games_record'] = new_games
+
     def add_game(self, winner, looser):
         games = self.get_games()
-        games.extend((winner, looser, datetime.now()))
+
+        if games[0]==1: # oops
+            raise Exception('run fixoring first')
+
+        games.append((winner, looser, datetime.now()))
         self['games_record'] = games
 
     def get_players(self):
@@ -72,8 +88,29 @@ class Tourney(BotPlugin):
         if winner != p1 and winner != p2:
             return 'The winner of the match did not play ?!'
         looser = p1 if winner == p2 else p2
-        ((winner_oldrank, winner_rank), (looser_oldrank, looser_rank)) = self.add_game_result(winner, looser)
+        (winner_oldrank, winner_rank), (looser_oldrank, looser_rank) = self.add_game_result(winner, looser)
         return 'Game added %s won against %s.\n%10s %4i -> %4i\n%10s %4i -> %4i' % (winner, looser, winner, winner_oldrank, winner_rank, looser, looser_oldrank, looser_rank)
+
+    @botcmd
+    def elo_stats(self, mess, args):
+        stats = {}
+        logging.info("%s"%self['games_record'])
+        for winner, looser, d in self['games_record']:
+            if stats.has_key(winner):
+                stats[winner]['wins'] += 1
+                stats[winner]['last_game'] = d
+            else:
+                stats[winner] = {'wins': 1, 'losses': 0, 'first_game': d, 'last_game': d}
+
+            if stats.has_key(looser):
+                stats[looser]['losses'] += 1
+                stats[looser]['last_game'] = d
+            else:
+                stats[looser] = {'wins': 0, 'losses': 1, 'first_game': d, 'last_game': d}
+        results = stats.items()
+        results= sorted(results, key=lambda result: result[1]['losses']-result[1]['wins'])
+        return '    Player        wins      losses          first/last\n' + '\n'.join( ["%10s  %10i %10i           [%s/%s]" % (result[0],result[1]['wins'],result[1]['losses'], result[1]['first_game'], result[1]['last_game']) for result in results ] )
+
 
     @botcmd
     def elo_rankings(self, mess, args):
@@ -106,8 +143,8 @@ class Tourney(BotPlugin):
 
     def get_matches_to_play(self):
         round = self['round']
-        for layer in range(0,len(round)-1):
-            for match_index in range(0,len(round[layer])):
+        for layer in range(0, len(round) - 1):
+            for match_index in range(0, len(round[layer])):
                 pass ###################
 
     @botcmd(split_args_with=' ')
@@ -133,8 +170,8 @@ class Tourney(BotPlugin):
         round = [self.elim_pairings(selected_players)]
 
         while len(round[-1]) != 1:
-            round.append([None]*(len(round[-1])/2))
+            round.append([None] * (len(round[-1]) / 2))
         self['round'] = round
 
-        return '\n'.join(['%10s vs %10s' % (p1, p2) for (p1,p2) in self['round'][0]])
+        return '\n'.join(['%10s vs %10s' % (p1, p2) for (p1, p2) in self['round'][0]])
 
