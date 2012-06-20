@@ -11,25 +11,8 @@ class Tourney(BotPlugin):
     def get_games(self):
         return self.get('games_record', [])
 
-    @botcmd
-    def fixorgames(self, a,b):
-        games = self.get_games()
-        if games[0]!=1: # oops
-            raise Exception('no need to fixor')
-
-        games = self.get_games()
-        new_games = []
-        for i in range(0, len(games), 3):
-            new_games.append((games[i], games[i+1], games[i+2]))
-        logging.info('%s'% new_games )
-        self['games_record'] = new_games
-
     def add_game(self, winner, looser):
         games = self.get_games()
-
-        if games[0]==1: # oops
-            raise Exception('run fixoring first')
-
         games.append((winner, looser, datetime.now()))
         self['games_record'] = games
 
