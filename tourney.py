@@ -8,6 +8,7 @@ MAX_INCREASE = 32
 INITIAL_SCORE = 1500
 
 class Tourney(BotPlugin):
+    min_err_version = '1.2.2' # for dictionary mixin
     def get_games(self):
         return self.get('games_record', [])
 
