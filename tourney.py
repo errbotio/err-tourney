@@ -103,7 +103,7 @@ class Tourney(BotPlugin):
         """
         l = [(rank, player) for player, rank in self.get_players().iteritems()]
         l.sort(reverse=True)
-        return '\n'.join(['%4i : %10s' % (rank, player) for (rank, player) in l])
+        return '\n'.join(['%02i - %9s [%4i]' % (i+1, player, rank) for (i, (rank, player)) in enumerate(l)])
 
     @botcmd
     def elim_cancel(self, mess, args):
