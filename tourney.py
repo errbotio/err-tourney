@@ -25,6 +25,11 @@ class Tourney(BotPlugin):
         players[name] = 1500
         self['players'] = players
 
+    def remove_players(self, name):
+        players = self.get_players()
+        del players[name]
+        self['players'] = players
+
     def add_game_result(self, winner, looser):
         players = self.get_players()
         self.add_game(winner, looser)
@@ -54,6 +59,22 @@ class Tourney(BotPlugin):
         self.shelf.sync()
         return 'Player %s added' % player
 
+
+    @botcmd(split_args_with=' ')
+    def elo_remove(self, mess, args):
+        """
+        Remove a player
+        """
+        if len(args) != 1:
+            return 'Just name a player'
+        player = args[0]
+        if player not in self.get_players():
+            return 'this player doesn\'t exist...'
+        self.remove_players(player)
+        self.shelf.sync()
+        return 'Player %s removed' % player
+
+
     @botcmd(split_args_with=' ')
     def elo_match(self, mess, args):
         """
@@ -69,6 +90,8 @@ class Tourney(BotPlugin):
                 return 'Unknown player %s' % player
         p1 = args[0]
         p2 = args[1]
+        if p1 == p2:
+            return 'Really?... Sorry.. Can\'t play against yourself (dah...).'
         winner = args[2]
         if winner != p1 and winner != p2:
             return 'The winner of the match did not play ?!'
