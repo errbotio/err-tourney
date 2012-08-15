@@ -1,8 +1,16 @@
 from datetime import datetime
 import logging
 from math import ceil, sqrt
-from errbot.botplugin import BotPlugin
-from errbot.jabberbot import botcmd
+
+# Backward compatibility
+from errbot.version import VERSION
+from errbot.utils import version2array
+if version2array(VERSION) >= [1,6,0]:
+    from errbot import botcmd, BotPlugin
+else:
+    from errbot.botplugin import BotPlugin
+    from errbot.jabberbot import botcmd
+
 
 MAX_INCREASE = 32
 INITIAL_SCORE = 1500
